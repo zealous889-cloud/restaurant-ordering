@@ -1,0 +1,129 @@
+// Prisma schema for the restaurant online ordering system
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  KITCHEN
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT // created, waiting for payment
+  PAID            // payment succeeded -> sent to kitchen
+  CANCELLED       // payment failed/expired
+  COMPLETED       // kitchen finished + picked up
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  EXPIRED
+}
+
+enum PaymentMethod {
+  PROMPTPAY
+  CARD
+}
+
+enum KitchenState {
+  WAITING    // รอทำอาหาร
+  COOKING    // กำลังทำ
+  READY      // พร้อมรับ
+  DONE       // เสร็จสิ้น
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  sortOrder Int       @default(0)
+  active    Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String      @default("")
+  price       Decimal     @db.Decimal(10, 2)
+  imageUrl    String      @default("")
+  available   Boolean     @default(true)
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Order {
+  id            String        @id @default(uuid())
+  orderNumber   String        @unique
+  customerName  String
+  customerPhone String
+  note          String        @default("")
+  status        OrderStatus   @default(PENDING_PAYMENT)
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id])
+  items         OrderItem[]
+  payment       Payment?
+  kitchenStatus KitchenStatus?
+  estimatedReadyAt DateTime?
+  expiresAt     DateTime?
+  createdAt     DateTime      @default(now())
+  paidAt        DateTime?
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  nameSnapshot  String
+  priceSnapshot Decimal @db.Decimal(10, 2)
+  quantity  Int
+  subtotal  Decimal @db.Decimal(10, 2)
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String        @unique
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  amount        Decimal       @db.Decimal(10, 2)
+  provider      String        @default("stripe")
+  providerRef   String?       // Stripe PaymentIntent id
+  qrCodeUrl     String?       // PromptPay QR image/data
+  rawPayload    Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model KitchenStatus {
+  id        String       @id @default(uuid())
+  orderId   String       @unique
+  order     Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  state     KitchenState @default(WAITING)
+  updatedAt DateTime     @updatedAt
+  createdAt DateTime     @default(now())
+}

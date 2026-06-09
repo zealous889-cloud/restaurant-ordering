@@ -1,0 +1,90 @@
+'use client';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { api } from '@/lib/api';
+import { useCart } from '@/lib/cart';
+
+export default function MenuPage() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [cats, setCats] = useState<any[]>([]);
+  const [active, setActive] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+  const { add, count, total } = useCart();
+
+  useEffect(() => {
+    Promise.all([api.get('/products'), api.get('/categories')])
+      .then(([p, c]) => { setProducts(p); setCats(c); })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const shown = useMemo(
+    () => (active === 'all' ? products : products.filter((p) => p.categoryId === active)),
+    [products, active],
+  );
+
+  return (
+    <div className="pb-24">
+      <header className="sticky top-0 z-10 bg-brand text-white px-4 py-4 shadow">
+        <h1 className="text-xl font-bold">ครัวอร่อยเด็ด</h1>
+        <p className="text-sm opacity-90">เลือกเมนูโปรด แล้วสั่งได้เลย</p>
+      </header>
+
+      <div className="sticky top-[72px] z-10 bg-white border-b">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar px-4 py-3">
+          <Chip label="ทั้งหมด" on={active === 'all'} onClick={() => setActive('all')} />
+          {cats.map((c) => (
+            <Chip key={c.id} label={c.name} on={active === c.id} onClick={() => setActive(c.id)} />
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <p className="p-6 text-center text-gray-500">กำลังโหลดเมนู...</p>
+      ) : (
+        <ul className="grid grid-cols-2 gap-3 p-4 md:grid-cols-3">
+          {shown.map((p) => (
+            <li key={p.id} className="rounded-2xl border bg-white overflow-hidden flex flex-col">
+              <div className="aspect-square bg-gray-100 overflow-hidden">
+                {p.imageUrl ? (
+                  <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                ) : null}
+              </div>
+              <div className="p-3 flex flex-col flex-1">
+                <p className="font-semibold text-sm leading-tight">{p.name}</p>
+                <p className="text-xs text-gray-500 line-clamp-2 mt-1 flex-1">{p.description}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="font-bold text-brand">฿{Number(p.price)}</span>
+                  <button
+                    onClick={() => add(p)}
+                    className="bg-brand text-white w-8 h-8 rounded-full text-lg leading-none active:scale-95"
+                  >+</button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {count > 0 && (
+        <Link
+          href="/cart"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-brand text-white rounded-full px-6 py-3 flex items-center justify-between shadow-lg"
+        >
+          <span className="font-semibold">ดูตะกร้า ({count})</span>
+          <span className="font-bold">฿{total}</span>
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm border ${
+        on ? 'bg-brand text-white border-brand' : 'bg-white text-gray-700 border-gray-300'
+      }`}
+    >{label}</button>
+  );
+}
