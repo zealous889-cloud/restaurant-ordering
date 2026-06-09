@@ -14,6 +14,9 @@
     "skipLibCheck": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "prisma"]
 }
