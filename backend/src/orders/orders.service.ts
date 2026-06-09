@@ -51,6 +51,7 @@ export class OrdersService implements OnModuleInit {
         priceSnapshot: price,
         quantity: i.quantity,
         subtotal,
+        note: i.note ?? '',
       };
     });
 

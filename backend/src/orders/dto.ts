@@ -4,6 +4,7 @@ import { Type } from 'class-transformer';
 export class CartItemDto {
   @IsString() productId: string;
   @IsInt() @Min(1) quantity: number;
+  @IsOptional() @IsString() note?: string;
 }
 
 export class CreateOrderDto {

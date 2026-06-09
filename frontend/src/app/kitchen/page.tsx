@@ -92,8 +92,11 @@ export default function KitchenPage() {
                 </div>
                 <ul className="my-3 text-sm">
                   {o.items.map((i: any) => (
-                    <li key={i.id} className="flex justify-between py-0.5">
-                      <span>{i.nameSnapshot}</span><span className="font-bold">x{i.quantity}</span>
+                    <li key={i.id} className="py-0.5">
+                      <div className="flex justify-between">
+                        <span>{i.nameSnapshot}</span><span className="font-bold">x{i.quantity}</span>
+                      </div>
+                      {i.note && <p className="text-xs text-red-600 font-medium">↳ {i.note}</p>}
                     </li>
                   ))}
                 </ul>

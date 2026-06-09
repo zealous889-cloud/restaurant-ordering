@@ -73,9 +73,12 @@ export default function OrderPage() {
         <div className="rounded-xl border p-4">
           <p className="font-semibold mb-2">รายการอาหาร</p>
           {order.items.map((i: any) => (
-            <div key={i.id} className="flex justify-between text-sm py-0.5">
-              <span>{i.nameSnapshot} x{i.quantity}</span>
-              <span>฿{Number(i.subtotal)}</span>
+            <div key={i.id} className="py-0.5">
+              <div className="flex justify-between text-sm">
+                <span>{i.nameSnapshot} x{i.quantity}</span>
+                <span>฿{Number(i.subtotal)}</span>
+              </div>
+              {i.note && <p className="text-xs text-gray-500">↳ {i.note}</p>}
             </div>
           ))}
           <div className="flex justify-between font-bold border-t mt-2 pt-2"><span>รวม</span><span>฿{Number(order.totalAmount)}</span></div>

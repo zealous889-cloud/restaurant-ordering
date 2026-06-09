@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 export type Product = { id: string; name: string; price: number | string; imageUrl?: string };
-export type CartItem = { product: Product; quantity: number };
+export type CartItem = { product: Product; quantity: number; note?: string };
 
 type CartCtx = {
   items: CartItem[];
@@ -10,6 +10,7 @@ type CartCtx = {
   inc: (id: string) => void;
   dec: (id: string) => void;
   remove: (id: string) => void;
+  setNote: (id: string, note: string) => void;
   clear: () => void;
   count: number;
   total: number;
@@ -38,12 +39,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const dec = (id: string) =>
     setItems((c) => c.flatMap((i) => (i.product.id === id ? (i.quantity > 1 ? [{ ...i, quantity: i.quantity - 1 }] : []) : [i])));
   const remove = (id: string) => setItems((c) => c.filter((i) => i.product.id !== id));
+  const setNote = (id: string, note: string) =>
+    setItems((c) => c.map((i) => (i.product.id === id ? { ...i, note } : i)));
   const clear = () => setItems([]);
 
   const count = items.reduce((s, i) => s + i.quantity, 0);
   const total = items.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
 
-  return <Ctx.Provider value={{ items, add, inc, dec, remove, clear, count, total }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ items, add, inc, dec, remove, setNote, clear, count, total }}>{children}</Ctx.Provider>;
 }
 
 export const useCart = () => {
