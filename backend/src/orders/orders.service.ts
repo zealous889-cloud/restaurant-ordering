@@ -32,10 +32,14 @@ export class OrdersService implements OnModuleInit {
   }
 
   async create(dto: CreateOrderDto) {
+    // The same product can appear on multiple lines (different options),
+    // so validate by unique ids instead of comparing list lengths.
+    const uniqueIds = [...new Set(dto.items.map((i) => i.productId))];
     const products = await this.prisma.product.findMany({
-      where: { id: { in: dto.items.map((i) => i.productId) }, available: true },
+      where: { id: { in: uniqueIds }, available: true },
     });
-    if (products.length !== dto.items.length) {
+    const available = new Set(products.map((p) => p.id));
+    if (!dto.items.every((i) => available.has(i.productId))) {
       throw new BadRequestException('มีสินค้าบางรายการไม่พร้อมจำหน่าย');
     }
 
