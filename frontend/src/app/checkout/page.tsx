@@ -24,7 +24,11 @@ export default function CheckoutPage() {
         customerName: name,
         customerPhone: phone,
         note,
-        items: items.map((i) => ({ productId: i.product.id, quantity: i.quantity })),
+        items: items.map((i) => ({
+          productId: i.product.id,
+          quantity: i.quantity,
+          note: [i.options, i.note].filter(Boolean).join(' • '),
+        })),
       });
       router.push(`/payment/${order.id}`);
     } catch (e: any) {
@@ -47,8 +51,8 @@ export default function CheckoutPage() {
         <div className="rounded-xl border p-4 bg-gray-50">
           <p className="font-semibold mb-2">สรุปรายการ</p>
           {items.map((i) => (
-            <div key={i.product.id} className="flex justify-between text-sm py-0.5">
-              <span>{i.product.name} x{i.quantity}</span>
+            <div key={i.lineKey} className="flex justify-between text-sm py-0.5">
+              <span>{i.product.name}{i.options ? ` (${i.options})` : ''} x{i.quantity}</span>
               <span>฿{Number(i.product.price) * i.quantity}</span>
             </div>
           ))}

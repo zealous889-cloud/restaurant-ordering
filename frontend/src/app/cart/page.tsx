@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cart';
 
 export default function CartPage() {
-  const { items, inc, dec, remove, setNote, total, count } = useCart();
+  const { items, inc, dec, setNote, total, count } = useCart();
   const router = useRouter();
 
   return (
@@ -22,25 +22,26 @@ export default function CartPage() {
       ) : (
         <ul className="divide-y">
           {items.map((i) => (
-            <li key={i.product.id} className="p-4">
+            <li key={i.lineKey} className="p-4">
               <div className="flex items-center gap-3">
                 <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden shrink-0">
                   {i.product.imageUrl && <img src={i.product.imageUrl} className="w-full h-full object-cover" />}
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-sm">{i.product.name}</p>
+                  {i.options && <p className="text-xs text-gray-500">{i.options}</p>}
                   <p className="text-brand font-bold text-sm">฿{Number(i.product.price)}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => dec(i.product.id)} className="w-8 h-8 rounded-full border text-lg">−</button>
+                  <button onClick={() => dec(i.lineKey)} className="w-8 h-8 rounded-full border text-lg">−</button>
                   <span className="w-6 text-center">{i.quantity}</span>
-                  <button onClick={() => inc(i.product.id)} className="w-8 h-8 rounded-full bg-brand text-white text-lg">+</button>
+                  <button onClick={() => inc(i.lineKey)} className="w-8 h-8 rounded-full bg-brand text-white text-lg">+</button>
                 </div>
               </div>
               <input
                 value={i.note ?? ''}
-                onChange={(e) => setNote(i.product.id, e.target.value)}
-                placeholder="หมายเหตุเมนูนี้ เช่น ไม่เผ็ด, เพิ่มไข่"
+                onChange={(e) => setNote(i.lineKey, e.target.value)}
+                placeholder="หมายเหตุเพิ่มเติม เช่น ไม่ใส่ฟอง, แก้วเล็ก"
                 className="mt-2 w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:border-brand outline-none"
               />
             </li>

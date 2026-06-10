@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import { CartProvider } from '@/lib/cart';
 
 export const metadata: Metadata = {
-  title: 'สั่งอาหารออนไลน์',
-  description: 'ระบบสั่งอาหารออนไลน์สำหรับร้านอาหาร',
+  title: 'Coffee Corner — สั่งกาแฟออนไลน์',
+  description: 'ระบบสั่งกาแฟออนไลน์สำหรับร้านกาแฟ',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
